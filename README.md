@@ -117,10 +117,6 @@ pm2 save
 pm2 startup   # הפעלה אוטומטית לאחר ריסטרט לשרת
 ```
 
-**הגדרה מומלצת לשימוש משותף:**
-- השג מספר טלפון ייעודי (סים זול או מספר וירטואלי)
-- רשום וואטסאפ על אותו מספר
-
 # WhatsApp Poll Reminder Bot
 
 A Node.js bot that connects to your WhatsApp account, watches any group you're in for polls, and automatically reminds non-voters after a configurable time window.
@@ -238,16 +234,3 @@ pm2 start "npm start" --name whatsapp-survey
 pm2 save
 pm2 startup   # auto-restart on server reboot
 ```
-
-**Recommended setup for shared use:**
-- Get a dedicated phone number (cheap prepaid SIM or virtual number)
-- Register WhatsApp on that number
-- Deploy the bot to a server using that account
-- Share the number with anyone who wants reminders — they just add it to their group
-
----
-
----
-
-- פרוס את הבוט על שרת עם חשבון זה
-- שתף את המספר עם כל מי שרוצה תזכורות — הם פשוט מוסיפים אותו לקבוצה שלהם

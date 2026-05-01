@@ -1,30 +1,33 @@
 # WhatsApp Poll Reminder Bot
 
-A Node.js bot that watches your WhatsApp groups for polls and automatically reminds non-voters after a configurable time window.
+A Node.js bot that connects to your WhatsApp account, watches any group you're in for polls, and automatically reminds non-voters after a configurable time window.
+
+> Built with [Baileys](https://github.com/WhiskeySockets/Baileys) — connects as a linked WhatsApp device, no browser or phone needed after first setup.
 
 ---
 
 ## How it works
 
-1. You create a native WhatsApp poll in any group
-2. The bot detects it and starts a response window (default: 24 hours)
-3. When the window closes, the bot replies to the poll tagging everyone who hasn't voted yet
-4. If someone votes and then cancels, they are included in the reminder
+1. You create a native WhatsApp poll in any group the bot's account is a member of
+2. The bot detects it instantly and starts a response window (default: 24 hours)
+3. When the window closes, the bot replies directly to the poll — tagging everyone who hasn't voted
+4. Votes that were cast and then cancelled count as non-votes
+5. Works across multiple groups and multiple simultaneous polls
 
 ---
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) v20.6 or higher
-- A WhatsApp account (dedicated number recommended for shared use)
+- A WhatsApp account for the bot (a dedicated number is recommended so others can add it to their groups)
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/whatsapp-survey.git
-cd whatsapp-survey
+git clone https://github.com/itamarbe88/whatsapp-survey-reminder-bot.git
+cd whatsapp-survey-reminder-bot
 npm install
 ```
 
@@ -35,7 +38,11 @@ npm install
 Copy `.env.example` to `.env`:
 
 ```bash
+# Mac / Linux
 cp .env.example .env
+
+# Windows
+copy .env.example .env
 ```
 
 Edit `.env`:
@@ -46,7 +53,7 @@ RESPONSE_WINDOW_HOURS=24
 
 | Variable | Description | Default |
 |---|---|---|
-| `RESPONSE_WINDOW_HOURS` | How long to wait before sending the reminder | `24` |
+| `RESPONSE_WINDOW_HOURS` | Hours to wait before sending the reminder | `24` |
 
 ---
 
@@ -57,60 +64,65 @@ RESPONSE_WINDOW_HOURS=24
 npm start
 ```
 
-**Windows (Hebrew / non-ASCII characters):**
+**Windows:**
 ```bash
 npm run start:win
 ```
 
-On first run, a QR code will appear in the terminal. Scan it with WhatsApp on your phone:  
+> `start:win` sets the terminal to UTF-8 so Hebrew characters display correctly.
+
+On first run, a QR code appears in the terminal. Scan it with WhatsApp:
+
 **WhatsApp → Settings → Linked Devices → Link a Device**
 
-The session is saved in `auth_info/`. You won't need to scan again unless you delete that folder.
+The session is saved in `auth_info/`. You won't need to scan again unless you delete that folder or log out from WhatsApp's linked devices screen.
 
 ---
 
 ## Usage
 
-1. Start the bot and keep it running
-2. Open any WhatsApp group the bot's account is a member of
-3. Create a poll (tap `+` → Poll)
-4. The bot detects it automatically — no commands needed
-5. After the configured window, the bot replies to the poll mentioning everyone who hasn't voted
+Once the bot is running and connected:
 
-The bot supports multiple groups and multiple simultaneous polls.
+1. Add the bot's WhatsApp number to any group
+2. Create a poll in the group (tap `+` → Poll)
+3. The bot detects it automatically — no commands or keywords needed
+4. After the configured window, the bot replies to the poll mentioning everyone who hasn't voted yet
 
 ---
 
 ## Re-scanning the QR code
 
-Delete the session folder and restart:
-
 ```bash
 # Mac / Linux
-rm -rf auth_info
+rm -rf auth_info && npm start
 
 # Windows
-Remove-Item -Recurse -Force auth_info
+Remove-Item -Recurse -Force auth_info; npm start
 ```
-
-Then run `npm start` again.
 
 ---
 
-## Deployment (always-on server)
+## Running 24/7 on a server
 
-To run the bot 24/7 without keeping your computer on, deploy to a cloud server:
+To keep the bot always on without leaving your computer running:
 
-1. Push this repo to GitHub
-2. Create a server (e.g. [Railway](https://railway.app), [Render](https://render.com), or a $5 VPS)
-3. SSH in and run `npm start` once to scan the QR code
-4. Use a process manager to keep it running:
+1. Get a cheap VPS ($5/month on [Hetzner](https://www.hetzner.com) or [DigitalOcean](https://www.digitalocean.com)) or deploy to [Railway](https://railway.app) / [Render](https://render.com)
+2. Clone the repo and install dependencies on the server
+3. Run `npm start` once over SSH to scan the QR code
+4. Use pm2 to keep it alive:
 
 ```bash
 npm install -g pm2
 pm2 start "npm start" --name whatsapp-survey
 pm2 save
+pm2 startup   # auto-restart on server reboot
 ```
+
+**Recommended setup for shared use:**
+- Get a dedicated phone number (cheap prepaid SIM or virtual number)
+- Register WhatsApp on that number
+- Deploy the bot to a server using that account
+- Share the number with anyone who wants reminders — they just add it to their group
 
 ---
 
@@ -118,31 +130,34 @@ pm2 save
 
 # בוט תזכורת לסקרי וואטסאפ
 
-בוט Node.js שמזהה סקרים בקבוצות וואטסאפ ושולח תזכורת לכל מי שלא הצביע בתום חלון הזמן שהגדרת.
+בוט Node.js שמתחבר לחשבון וואטסאפ שלך, עוקב אחרי סקרים בכל קבוצה שהחשבון חבר בה, ושולח תזכורת אוטומטית למי שלא הצביע בתום חלון הזמן.
+
+> בנוי עם [Baileys](https://github.com/WhiskeySockets/Baileys) — מתחבר כמכשיר מקושר לוואטסאפ, ללא צורך בדפדפן או טלפון לאחר ההגדרה הראשונית.
 
 ---
 
 ## איך זה עובד
 
-1. אתה יוצר סקר (Poll) בכל קבוצת וואטסאפ
-2. הבוט מזהה את הסקר ומתחיל למנות את חלון הזמן (ברירת מחדל: 24 שעות)
-3. בסיום החלון, הבוט מגיב לסקר ומתייג את כל מי שטרם הצביע
-4. אם מישהו הצביע וביטל את הצבעתו — הוא יכלל בתזכורת
+1. אתה יוצר סקר (Poll) בכל קבוצה שחשבון הבוט חבר בה
+2. הבוט מזהה את הסקר מיידית ומתחיל את חלון הזמן (ברירת מחדל: 24 שעות)
+3. בסיום החלון, הבוט מגיב ישירות לסקר ומתייג את כל מי שלא הצביע
+4. מי שהצביע וביטל את הצבעתו נחשב כמי שלא הצביע
+5. תומך במספר קבוצות ומספר סקרים בו-זמנית
 
 ---
 
 ## דרישות
 
 - [Node.js](https://nodejs.org/) גרסה 20.6 ומעלה
-- חשבון וואטסאפ (מומלץ מספר ייעודי לשימוש משותף)
+- חשבון וואטסאפ לבוט (מומלץ מספר ייעודי כדי שאחרים יוכלו להוסיף אותו לקבוצות שלהם)
 
 ---
 
 ## התקנה
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/whatsapp-survey.git
-cd whatsapp-survey
+git clone https://github.com/itamarbe88/whatsapp-survey-reminder-bot.git
+cd whatsapp-survey-reminder-bot
 npm install
 ```
 
@@ -153,7 +168,11 @@ npm install
 העתק את `.env.example` לקובץ `.env`:
 
 ```bash
+# Mac / Linux
 cp .env.example .env
+
+# Windows
+copy .env.example .env
 ```
 
 ערוך את `.env`:
@@ -175,55 +194,62 @@ RESPONSE_WINDOW_HOURS=24
 npm start
 ```
 
-**Windows (תמיכה בעברית):**
+**Windows:**
 ```bash
 npm run start:win
 ```
 
-בהפעלה ראשונה יופיע ברקוד בטרמינל. סרוק אותו דרך הוואטסאפ שלך:  
+> הפקודה `start:win` מגדירה את הטרמינל ל-UTF-8 כדי שתווים בעברית יוצגו בצורה תקינה.
+
+בהפעלה ראשונה יופיע ברקוד בטרמינל. סרוק אותו דרך הוואטסאפ שלך:
+
 **וואטסאפ ← הגדרות ← מכשירים מקושרים ← קישור מכשיר**
 
-הסשן נשמר בתיקיית `auth_info/` — לא תצטרך לסרוק שוב אלא אם תמחק אותה.
+הסשן נשמר בתיקיית `auth_info/` — לא תצטרך לסרוק שוב, אלא אם תמחק את התיקייה או תנתק את המכשיר ממסך המכשירים המקושרים.
 
 ---
 
 ## שימוש
 
-1. הפעל את הבוט והשאר אותו פועל
-2. פתח קבוצת וואטסאפ שחשבון הבוט חבר בה
-3. צור סקר (לחץ על `+` ← סקר)
-4. הבוט מזהה את הסקר אוטומטית — אין צורך בפקודות
-5. לאחר חלון הזמן, הבוט מגיב לסקר ומתייג את כל מי שלא הצביע
+לאחר שהבוט פועל ומחובר:
 
-הבוט תומך במספר קבוצות ומספר סקרים בו-זמנית.
+1. הוסף את מספר הבוט לכל קבוצה
+2. צור סקר בקבוצה (לחץ על `+` ← סקר)
+3. הבוט מזהה את הסקר אוטומטית — אין צורך בפקודות או מילות מפתח
+4. לאחר חלון הזמן, הבוט מגיב לסקר ומתייג את כל מי שלא הצביע
 
 ---
 
 ## סריקה מחדש של הברקוד
 
-מחק את תיקיית הסשן והפעל מחדש:
-
 ```bash
 # Mac / Linux
-rm -rf auth_info
+rm -rf auth_info && npm start
 
 # Windows
-Remove-Item -Recurse -Force auth_info
+Remove-Item -Recurse -Force auth_info; npm start
 ```
 
 ---
 
-## פריסה לשרת (תמידי)
+## הרצה 24/7 על שרת
 
-להרצת הבוט 24/7 ללא תלות במחשב שלך:
+כדי שהבוט יפעל ללא הפסקה מבלי להשאיר את המחשב דלוק:
 
-1. העלה את הפרויקט ל-GitHub
-2. צור שרת (למשל [Railway](https://railway.app), [Render](https://render.com), או VPS ב-5$)
-3. התחבר דרך SSH והפעל `npm start` פעם אחת לסריקת הברקוד
-4. השתמש ב-pm2 להרצה תמידית:
+1. שכור שרת זול ($5 בחודש ב-[Hetzner](https://www.hetzner.com) או [DigitalOcean](https://www.digitalocean.com)), או פרוס ב-[Railway](https://railway.app) / [Render](https://render.com)
+2. שכפל את הריפו והתקן את התלויות על השרת
+3. הפעל `npm start` פעם אחת דרך SSH לסריקת הברקוד
+4. השתמש ב-pm2 לשמור על הרצה תמידית:
 
 ```bash
 npm install -g pm2
 pm2 start "npm start" --name whatsapp-survey
 pm2 save
+pm2 startup   # הפעלה אוטומטית לאחר ריסטרט לשרת
 ```
+
+**הגדרה מומלצת לשימוש משותף:**
+- השג מספר טלפון ייעודי (סים זול או מספר וירטואלי)
+- רשום וואטסאפ על אותו מספר
+- פרוס את הבוט על שרת עם חשבון זה
+- שתף את המספר עם כל מי שרוצה תזכורות — הם פשוט מוסיפים אותו לקבוצה שלהם

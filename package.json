@@ -1,0 +1,16 @@
+{
+  "name": "whatsapp-survey",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env index.js",
+    "start:win": "chcp 65001 && node --env-file=.env index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "node-cron": "^3.0.3",
+    "pino": "^8.21.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.7"
+  }
+}
